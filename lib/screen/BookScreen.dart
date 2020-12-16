@@ -63,24 +63,23 @@ class BookScreenState extends State<BookScreen>{
     );
 
     var searchView =  new Container(
-      color: Theme.of(context).primaryColor,
-      child: new Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: new Card(
-          child: new ListTile(
-            leading: new Icon(Icons.search),
-            title: new TextField(
-              controller: _controller,
-              decoration: new InputDecoration(
-                  hintText: 'Search', border: InputBorder.none),
-              onChanged: filterData,
-            ),
-            trailing: new IconButton(icon: new Icon(Icons.cancel), onPressed: () {
-              _controller.clear();
-              filterData('');
-            },),
-          ),
+      margin: const EdgeInsets.all(15.0),
+      padding: const EdgeInsets.all(3.0),
+      decoration: BoxDecoration(
+          border: Border.all(color: BookConstant.appColour)
+      ),
+      child: ListTile(
+        leading: new Icon(Icons.search),
+        title: new TextField(
+          controller: _controller,
+          decoration: new InputDecoration(
+              hintText: 'Search', border: InputBorder.none),
+          onChanged: filterData,
         ),
+        trailing: new IconButton(icon: new Icon(Icons.cancel), onPressed: () {
+          _controller.clear();
+          filterData('');
+        },),
       ),
     );
     var column = ListView(children: [
