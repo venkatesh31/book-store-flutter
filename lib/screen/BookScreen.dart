@@ -8,6 +8,7 @@ import 'package:book_store/response/UserResponse.dart';
 import 'package:book_store/screen/BookDetailScreen.dart';
 import 'package:book_store/utils/BookConstant.dart';
 import 'package:book_store/utils/CustomHeading.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -20,44 +21,143 @@ class BookScreen extends StatefulWidget{
 
 class BookScreenState extends State<BookScreen>{
 
+  TextEditingController _controller = new TextEditingController();
+
+  List<BookData> filteredList = new List();
+  List<BookData> bookDataInitList = new List();
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Book List"),),
-      body: getFuture(context),
+      body: getHomeRecentData(context),
     );
   }
+  @override
+  initState() {
+    super.initState();
+   getUserDetails();
 
-  FutureBuilder<BookResponse> getFuture(BuildContext context) {
-    return FutureBuilder<BookResponse>(
-        future: BookApiCalls.getBook(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) print(snapshot.error);
-          return snapshot.hasData
-              ? getHomeRecentData(snapshot.data, context)
-              : Center(child: CircularProgressIndicator());
-        });
   }
 
-  getHomeRecentData(BookResponse diaryGroupResponse, BuildContext context) {
-    if (diaryGroupResponse == null ||
-        diaryGroupResponse.data == null ||
-        diaryGroupResponse.data.isEmpty) {
+  Future<Null> getUserDetails() async {
+    BookResponse response = await BookApiCalls.getBook();
+
+    setState(() {
+      bookDataInitList.addAll(response.data);
+    });
+  }
+
+
+  getHomeRecentData( BuildContext context) {
+    if (bookDataInitList == null ||
+        bookDataInitList.isEmpty) {
       print("NO IEM");
-      return Text("No Data Found");
+      return Center(child: CircularProgressIndicator());
     }
-    return ListView.builder(
-      padding: EdgeInsets.all(10),
+
+    var ex =  new Container(
+      child: filteredList.length != 0 || _controller.text.isNotEmpty
+          ? setListView(filteredList): setListView(bookDataInitList),
+    );
+
+    var searchView =  new Container(
+      color: Theme.of(context).primaryColor,
+      child: new Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: new Card(
+          child: new ListTile(
+            leading: new Icon(Icons.search),
+            title: new TextField(
+              controller: _controller,
+              decoration: new InputDecoration(
+                  hintText: 'Search', border: InputBorder.none),
+              onChanged: filterData,
+            ),
+            trailing: new IconButton(icon: new Icon(Icons.cancel), onPressed: () {
+              _controller.clear();
+              filterData('');
+            },),
+          ),
+        ),
+      ),
+    );
+    var column = ListView(children: [
+      Padding(padding:EdgeInsets.all(10),child: searchView,),ex
+    ],);
+    return column;
+  }
+
+  setListView(List<BookData> bookDataList){
+   return ListView.builder(
       scrollDirection: Axis.vertical,
-      itemCount: diaryGroupResponse.data.length,
+      itemCount: bookDataList.length,
       itemBuilder: (context, index) {
-        BookData diaryGroupData = diaryGroupResponse.data[index];
-        return getSectionItem(diaryGroupData, context);
+        BookData bookData = bookDataList[index];
+        return getSectionItem(bookData, context);
       },
       shrinkWrap: true,
       physics:
       ClampingScrollPhysics(),
     );
+  }
+
+  Future showSnachBar(
+      String value, BuildContext context, bool isSucess) {
+    Color color = isSucess ? Colors.green : Colors.red;
+    IconData icon = isSucess ? Icons.beenhere : Icons.cancel;
+    String title = isSucess ? "Yah!" : "Sorry!";
+    Flushbar(
+      flushbarPosition: FlushbarPosition.BOTTOM,
+      title: title,
+      message: value,
+      showProgressIndicator: true,
+      icon: Icon(
+        icon,
+        size: 28.0,
+        color: Colors.white,
+      ),
+      backgroundColor: color,
+      duration: Duration(seconds: 2),
+    )..show(context);
+  }
+
+
+
+  filterData(String searchText ){
+    print("Search Start");
+    filteredList.clear();
+    if(searchText==null || searchText.isEmpty){
+     setState(() {
+
+     });
+      return;
+    }
+    print("Not Empty Search Start");
+    bookDataInitList.forEach((bookData) {
+      List<Book> books = new List();
+      bookData.books.forEach((book) {
+        if(book.name.toLowerCase().contains(searchText.toLowerCase())){
+          print("Search "+book.name);
+          books.add(book);
+        }
+
+      });
+      if(books.isNotEmpty){
+        BookData bookData1 = new BookData();
+        bookData1.books = books;
+        bookData1.category = bookData.category;
+        filteredList.add(bookData1);
+      }
+
+    });
+
+    setState(() {
+
+    });
+    print("Search End");
+
   }
 
   getSectionItem( BookData diaryGroupData, BuildContext context) {

@@ -19,6 +19,8 @@ class LoginScreenState extends State<LoginScreen>{
   TextEditingController _userNameController = new TextEditingController();
   TextEditingController _passwordController = new TextEditingController();
 
+  bool showPassword= true;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,17 +42,31 @@ class LoginScreenState extends State<LoginScreen>{
           prefixIcon: Icon(Icons.person_outline),
 
         ));
-    var passwordEditView = TextFormField(
-      controller: _passwordController,
-      keyboardType: TextInputType.text,
-      obscureText: false,
-      style: TextStyle(color: Colors.black, fontFamily: 'SFUIDisplay'),
-      decoration: InputDecoration(
-          border: OutlineInputBorder(),
-          labelText: "Password",
-          prefixIcon: Icon(Icons.person_outline),
 
-      ));
+    final passwordEditView = TextFormField(
+      keyboardType: TextInputType.text,
+      controller: _passwordController,
+      obscureText: showPassword,
+      //This will obscure text dynamically
+      decoration: InputDecoration(
+        border: OutlineInputBorder(),
+        labelText: "Password",
+        prefixIcon: Icon(Icons.lock),
+        suffixIcon: IconButton(
+          icon: Icon(
+            // Based on passwordVisible state choose the icon
+            showPassword ? Icons.visibility_off : Icons.visibility,
+            color: Theme.of(context).primaryColorDark,
+          ),
+          onPressed: () {
+            // Update the state i.e. toogle the state of passwordVisible variable
+            setState(() {
+              showPassword = !showPassword;
+            });
+          },
+        ),
+      ),
+    );
     return Center(
       child: Container(
         color: Colors.white,
