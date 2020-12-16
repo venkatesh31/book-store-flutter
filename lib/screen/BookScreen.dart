@@ -89,6 +89,9 @@ class BookScreenState extends State<BookScreen>{
   }
 
   setListView(List<BookData> bookDataList){
+    if(bookDataList==null || bookDataList.isEmpty){
+      return Center(child: Text("No Data Found"),);
+    }
    return ListView.builder(
       scrollDirection: Axis.vertical,
       itemCount: bookDataList.length,
