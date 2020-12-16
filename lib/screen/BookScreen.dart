@@ -57,7 +57,7 @@ class BookScreenState extends State<BookScreen>{
       return Center(child: CircularProgressIndicator());
     }
 
-    var ex =  new Container(
+    var listData =  new Container(
       child: filteredList.length != 0 || _controller.text.isNotEmpty
           ? setListView(filteredList): setListView(bookDataInitList),
     );
@@ -83,7 +83,7 @@ class BookScreenState extends State<BookScreen>{
       ),
     );
     var column = ListView(children: [
-      Padding(padding:EdgeInsets.all(10),child: searchView,),ex
+      Padding(padding:EdgeInsets.all(10),child: searchView,),listData
     ],);
     return column;
   }
